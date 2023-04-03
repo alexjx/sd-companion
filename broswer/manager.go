@@ -113,11 +113,3 @@ func (b *Broswer) Delete(p string) error {
 	}
 	return os.Rename(filepath, trashPath)
 }
-
-func (b *Broswer) Content(p string) ([]byte, error) {
-	return nil, nil
-}
-
-func (b *Broswer) Metadata(p string) (map[string]string, error) {
-	return nil, nil
-}

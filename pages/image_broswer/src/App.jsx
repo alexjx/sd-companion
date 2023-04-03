@@ -12,6 +12,7 @@ function App() {
     const [rootPath, setRootPath] = useState('');
     const [files, setFiles] = useState([]);
     const [curIdx, setCurIdx] = useState(0);
+    const [toJpeg, setToJpeg] = useState(true);
 
     const containerRef = useRef(null);
     const [containerSize, setContainerSize] = useState({ height: 0, width: 0 });
@@ -102,7 +103,7 @@ function App() {
     useHotkeys('r', fetchFiles);
 
     return (
-        <div className='flex flex-col h-screen'>
+        <div className='flex flex-col h-screen justify-start items-center bg-gray-800'>
             <Nav
                 handles={
                     {
@@ -120,6 +121,12 @@ function App() {
                 }
                 rootPath={rootPath}
                 containerSize={containerSize}
+                jpegOpts={
+                    {
+                        toJpeg: toJpeg,
+                        setToJpeg: setToJpeg,
+                    }
+                }
             />
             <Broswer
                 files={files}
@@ -127,6 +134,7 @@ function App() {
                 curIdx={curIdx}
                 innerRef={containerRef}
                 containerSize={containerSize}
+                toJpeg={toJpeg}
             />
         </div>
     )

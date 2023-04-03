@@ -4,6 +4,7 @@ import (
 	"image"
 	"image/jpeg"
 	"image/png"
+	"strings"
 
 	"github.com/anthonynsimon/bild/transform"
 	"github.com/sirupsen/logrus"
@@ -84,7 +85,7 @@ func (b *Broswer) Encoded(p string, width, height int) (*EncodedImage, error) {
 	}
 	defer img.Close()
 
-	ext := img.Ext()
+	ext := strings.ToLower(img.Ext())
 	switch ext {
 	case ".jpg", ".jpeg":
 		return encodeFromJpg(img, width, height, b.quality)
