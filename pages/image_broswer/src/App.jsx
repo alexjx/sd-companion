@@ -17,7 +17,6 @@ function App() {
     const [containerSize, setContainerSize] = useState({ height: 0, width: 0 });
 
     const handleNext = () => {
-        console.log('next', curIdx);
         if (curIdx + 1 < files.length) {
             setCurIdx((curIdx) => (curIdx + 1));
         } else {
@@ -26,7 +25,6 @@ function App() {
     }
 
     const handlePrev = () => {
-        console.log('prev', curIdx);
         if (curIdx > 0) {
             setCurIdx((curIdx) => (curIdx - 1));
         } else {

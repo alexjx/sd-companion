@@ -38,14 +38,21 @@ var ServeCmd = &cli.Command{
 			Usage:   "the extensions of the files to broswer",
 			Value:   []string{"jpg", "jpeg", "png", "gif"},
 		},
+		&cli.IntFlag{
+			Name:    "quality",
+			Aliases: []string{"q"},
+			Usage:   "the quality of the jpeg image",
+			Value:   80,
+		},
 	},
 	Action: serveAction,
 }
 
 type ServeConfig struct {
-	Root   string
-	Listen string
-	Ext    []string
+	Root    string
+	Listen  string
+	Ext     []string
+	Quality int
 }
 
 // NewEngine create a gin engine
@@ -195,7 +202,7 @@ func NewEngine(cfg *ServeConfig, b *broswer.Broswer) *gin.Engine {
 
 // NewBroswer create a broswer
 func NewBroswer(cfg *ServeConfig) *broswer.Broswer {
-	return broswer.NewBroswer(cfg.Root, cfg.Ext)
+	return broswer.NewBroswer(cfg.Root, cfg.Ext, cfg.Quality)
 }
 
 func serve(cfg *ServeConfig, engine *gin.Engine) {
@@ -206,9 +213,10 @@ func serveAction(cctx *cli.Context) error {
 	logrus.SetLevel(logrus.DebugLevel)
 
 	cfg := &ServeConfig{
-		Root:   cctx.String("root"),
-		Listen: cctx.String("listen"),
-		Ext:    cctx.StringSlice("extensions"),
+		Root:    cctx.String("root"),
+		Listen:  cctx.String("listen"),
+		Ext:     cctx.StringSlice("extensions"),
+		Quality: cctx.Int("quality"),
 	}
 
 	fxApp := fx.New(

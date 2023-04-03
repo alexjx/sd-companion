@@ -8,7 +8,7 @@ import (
 )
 
 func TestBroswer(t *testing.T) {
-	b := broswer.NewBroswer("/workspaces/image-browser/", []string{".go"})
+	b := broswer.NewBroswer("/workspaces/image-browser/", []string{".go"}, 50)
 	files, err := b.Files()
 	if err != nil {
 		t.Fatal(err)

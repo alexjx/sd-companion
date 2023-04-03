@@ -20,9 +20,12 @@ type Broswer struct {
 
 	// trash is the trash directory
 	trash string
+
+	// jpeg quality
+	quality int
 }
 
-func NewBroswer(root string, exts []string) *Broswer {
+func NewBroswer(root string, exts []string, quality int) *Broswer {
 	root = path.Clean(root)
 
 	// ensure trash directory exists
@@ -43,6 +46,7 @@ func NewBroswer(root string, exts []string) *Broswer {
 		skipLength: len(root),
 		extsFilter: extsFilter,
 		trash:      trash,
+		quality:    quality,
 	}
 
 	return b

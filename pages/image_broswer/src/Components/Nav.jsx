@@ -13,8 +13,8 @@ export default function Nav(props) {
             <div className="flex-1 m-2 text-xl font-mono">Images: {rootPath}</div>
             <div className="navbar-end">
                 <div className="flex flex-col text-sm m-y-3">
-                    <div>H: {containerSize.height}</div>
-                    <div>W: {containerSize.width}</div>
+                    <div>Max H: {containerSize.height}</div>
+                    <div>Max W: {containerSize.width}</div>
                 </div>
                 <button className="btn btn-primary" onClick={handles.prev} >Previous</button>
                 <div className="m-2 text-xl font-mono">{curIdxNew} / {index.max}</div>

@@ -20,54 +20,59 @@ type EncodedImage struct {
 	Height int
 }
 
-func encodeIntoJpeg(im image.Image, width int, height int) (*EncodedImage, error) {
+func encodeIntoJpeg(im image.Image, h, w, q int) (*EncodedImage, error) {
 	// resize respect to the ratio
 	originalWidth := im.Bounds().Dx()
 	originalHeight := im.Bounds().Dy()
-
-	if width == 0 && height != 0 {
-		width = originalWidth * height / originalHeight
-	} else if height == 0 && width != 0 {
-		height = originalHeight * width / originalWidth
-	} else if width == 0 && height == 0 {
-		width = originalWidth
-		height = originalHeight
+	if w > originalWidth {
+		w = originalWidth
+	}
+	if h > originalHeight {
+		h = originalHeight
+	}
+	if w == 0 && h != 0 {
+		w = originalWidth * h / originalHeight
+	} else if h == 0 && w != 0 {
+		h = originalHeight * w / originalWidth
+	} else if w == 0 && h == 0 {
+		w = originalWidth
+		h = originalHeight
 	}
 
-	resized := transform.Resize(im, width, height, transform.NearestNeighbor)
+	resized := transform.Resize(im, w, h, transform.Linear)
 
 	buf := &buffer.Buffer{}
-	if err := jpeg.Encode(buf, resized, &jpeg.Options{Quality: 80}); err != nil {
+	if err := jpeg.Encode(buf, resized, &jpeg.Options{Quality: q}); err != nil {
 		return nil, err
 	}
 
 	return &EncodedImage{
 		Data:   buf.Bytes(),
-		Width:  width,
-		Height: height,
+		Width:  w,
+		Height: h,
 	}, nil
 }
 
 // encodeFromPng encode a png image to jpg
-func encodeFromPng(img *ImageFile, width, height int) (*EncodedImage, error) {
+func encodeFromPng(img *ImageFile, w, h, q int) (*EncodedImage, error) {
 	// decode from png
 	im, err := png.Decode(img)
 	if err != nil {
 		return nil, err
 	}
 
-	return encodeIntoJpeg(im, width, height)
+	return encodeIntoJpeg(im, w, h, q)
 }
 
 // encodeFromJpg encode a jpg image to jpg
-func encodeFromJpg(img *ImageFile, width, height int) (*EncodedImage, error) {
+func encodeFromJpg(img *ImageFile, w, h, q int) (*EncodedImage, error) {
 	// decode from jpg
 	im, err := jpeg.Decode(img)
 	if err != nil {
 		return nil, err
 	}
 
-	return encodeIntoJpeg(im, width, height)
+	return encodeIntoJpeg(im, w, h, q)
 }
 
 func (b *Broswer) Encoded(p string, width, height int) (*EncodedImage, error) {
@@ -82,9 +87,9 @@ func (b *Broswer) Encoded(p string, width, height int) (*EncodedImage, error) {
 	ext := img.Ext()
 	switch ext {
 	case ".jpg", ".jpeg":
-		return encodeFromJpg(img, width, height)
+		return encodeFromJpg(img, width, height, b.quality)
 	case ".png":
-		return encodeFromPng(img, width, height)
+		return encodeFromPng(img, width, height, b.quality)
 	default:
 		return nil, ErrUnsupportedImageFormat
 	}
