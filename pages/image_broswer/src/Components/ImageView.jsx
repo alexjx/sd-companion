@@ -1,22 +1,24 @@
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 export default function ImageView(props) {
-    const { imageSrc } = props;
+    const { imageSrc, imageRef } = props;
 
     return (
-        <TransformWrapper
-            doubleClick={{
-                mode: "reset",
-            }}
-        >
-            <TransformComponent>
-                <div className="h-full" id="img-container">
+            <TransformWrapper
+                doubleClick={{
+                    mode: "reset",
+                }}
+                >
+                <TransformComponent
+                    wrapperClass="h-full"
+                    contentClass="h-full"
+                >
                     <img
                         src={imageSrc}
-                        className="max-h-full object-contain"
+                        className="h-full"
+                        ref={imageRef}
                     />
-                </div>
-            </TransformComponent>
-        </TransformWrapper>
+                </TransformComponent>
+            </TransformWrapper>
     );
 }

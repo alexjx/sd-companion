@@ -4,7 +4,7 @@ import Details from "./Details";
 import ImageView from "./ImageView";
 
 export default function Broswer(props) {
-    const { files, root, curIdx, innerRef, containerSize, toJpeg } = props;
+    const { files, root, curIdx, innerRef, containerSize, toJpeg, imageRef } = props;
 
     const [imgSrc, setImgSrc] = useState(null);
 
@@ -19,7 +19,7 @@ export default function Broswer(props) {
         }
         // path need to be url escaped
         const escapedPath = encodeURIComponent(file.path)
-        return `${prefix}/api/encoded?path=${file.path}&height=${containerSize.height}`
+        return `${prefix}/api/encoded?path=${escapedPath}`
     }
 
     useEffect(() => {
@@ -29,19 +29,13 @@ export default function Broswer(props) {
     }, [curIdx, files, toJpeg]);
 
     return (
-        <div className="flex item-center justify-center h-full max-w-7xl" >
-            {
-                curIdx < files.length && (
-                    <div className="flex flex-row justify-center">
-                        <div className="mx-3" ref={innerRef}>
-                            {imgSrc && <ImageView imageSrc={imgSrc} />}
-                        </div>
-                        <div className="mx-3 max-w-xs overflow-y-auto" >
-                            <Details file={files[curIdx]} />
-                        </div>
-                    </div>
-                )
-            }
+        <div className="flex flex-row justify-center container-h" ref={innerRef}>
+            <div className="mx-3">
+                {imgSrc && <ImageView imageSrc={imgSrc} imageRef={imageRef} />}
+            </div>
+            <div className="mx-3 max-w-xs overflow-x-hidden overflow-y-auto" >
+                <Details file={files? files[curIdx] : null} />
+            </div>
         </div>
     )
 }

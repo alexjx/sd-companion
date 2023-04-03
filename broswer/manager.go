@@ -26,13 +26,16 @@ type Broswer struct {
 }
 
 func NewBroswer(root string, exts []string, quality int) *Broswer {
-	root = path.Clean(root)
+	root = filepath.Clean(root)
+	logrus.Infof("root path: %q", root)
 
 	// ensure trash directory exists
-	trash := path.Join(root, ".trash")
+	trash := filepath.Join(root, ".trash")
 	if err := os.MkdirAll(trash, 0755); err != nil {
 		logrus.Errorf("create trash directory %s error: %v", trash, err)
 	}
+	trash = filepath.Clean(trash)
+	logrus.Infof("trash path: %q", trash)
 
 	// create extensions filter
 	extsFilter := make(map[string]struct{})
@@ -59,9 +62,9 @@ func (b *Broswer) GetRoot() string {
 func (b *Broswer) Files() ([]*File, error) {
 	files := []*File{}
 
-	err := filepath.Walk(b.root, func(filepath string, info os.FileInfo, err error) error {
+	err := filepath.Walk(b.root, func(fpath string, info os.FileInfo, err error) error {
 		if err != nil {
-			logrus.Errorf("walk path %s error: %v", filepath, err)
+			logrus.Errorf("walk path %s error: %v", fpath, err)
 
 			// ignore permission denied error
 			if os.IsPermission(err) {
@@ -71,13 +74,15 @@ func (b *Broswer) Files() ([]*File, error) {
 		}
 
 		// ignore trash directory
-		if strings.HasPrefix(filepath, b.trash) {
+		fpath = filepath.Clean(fpath)
+		logrus.Infof("filepath: %q, trash: %q", fpath, b.trash)
+		if strings.HasPrefix(fpath, b.trash) {
 			return nil
 		}
 
 		if !info.IsDir() {
 			// normalize the path relative to the root
-			relativePath := filepath[b.skipLength+1:]
+			relativePath := fpath[b.skipLength+1:]
 
 			// filter the file by extension
 			ext := path.Ext(relativePath)
@@ -87,7 +92,7 @@ func (b *Broswer) Files() ([]*File, error) {
 			}
 
 			files = append(files, &File{
-				Path:       relativePath,
+				Path:       filepath.ToSlash(relativePath),
 				Size:       info.Size(),
 				ModifiedAt: info.ModTime(),
 			})

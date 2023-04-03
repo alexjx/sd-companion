@@ -11,72 +11,7 @@ export default function Details(props) {
     const fetchMetadata = (path) => {
         axios.get(`/api/metadata?path=${path}`)
             .then(res => {
-                let metadata = [];
-                let prompt, negative, template, name, size;
-
-                // sort keys
-                let keys = Object.keys(res.data.metadata);
-                keys.sort();
-
-                // map keys
-                keys.map((key, i) => {
-                    if (key === "Prompt") {
-                        prompt = res.data.metadata[key];
-                    } else if (key === "Negative prompt") {
-                        negative = res.data.metadata[key];
-                    } else if (key === "Template") {
-                        template = res.data.metadata[key];
-                    } else if (key === "Name") {
-                        name = res.data.metadata[key];
-                    } else if (key === "Size") {
-                        size = res.data.metadata[key];
-                    } else {
-                        metadata.push({
-                            key: key,
-                            value: res.data.metadata[key],
-                            type: 1, // inline
-                        });
-                    }
-                });
-
-                if (name) {
-                    metadata.splice(0, 0, {
-                        key: "Name",
-                        value: name,
-                        type: 1, // inline
-                    });
-                }
-                if (size) {
-                    metadata.splice(1, 0, {
-                        key: "Size",
-                        value: size,
-                        type: 1, // inline
-                    });
-                }
-                if (prompt) {
-                    metadata.push({
-                        key: "Prompt",
-                        value: prompt,
-                        type: 2, // block
-                    });
-                }
-                if (negative) {
-                    metadata.push({
-                        key: "Negative prompt",
-                        value: negative,
-                        type: 2, // block
-                    });
-                }
-                if (template) {
-                    // tempalte has newlines, we need to preserve
-                    metadata.push({
-                        key: "Template",
-                        value: template,
-                        type: 3, // block
-                    });
-                }
-
-                setMetadata(metadata);
+                setMetadata(res.data.metadata);
             })
             .catch(err => {
                 console.log(err);
@@ -84,39 +19,102 @@ export default function Details(props) {
     };
 
     useEffect(() => {
-        fetchMetadata(file.path);
+        if (file) {
+            fetchMetadata(file.path);
+        }
     }, [file]);
 
-    const formatMetadata = (metadata) => {
-        // map keys for div pairs
-        return metadata.map((item, i) => {
-            let className;
-            switch (item.type) {
-                case 1:
-                    className = "grid grid-cols-2";
-                    break;
-                case 2:
-                    className = "flex flex-col";
-                    break;
-                case 3:
-                    className = "flex flex-col whitespace-pre-wrap";
-                    break;
-                default:
-                    className = "grid grid-cols-2";
-                    break;
-            }
+    const formatOptions = (sd_info) => {
+        let optKeys = Object.keys(sd_info.options);
+        optKeys.sort();
+        return (
+            <>
+                {optKeys.map((key) => {
+                    return (
+                        <div className="grid grid-cols-2" key={key}>
+                            <div className="text-gray-200">{key}</div>
+                            <div>{sd_info.options[key]}</div>
+                        </div>
+                    )
+                })}
+            </>
+        )
+    }
+
+    const formatLoraInfo = (sd_info) => {
+        if (sd_info.loras) {
+            // sort by name, item in {name: xxx, weight: xxx}
+            sd_info.loras.sort((a, b) => {
+                return a.name.localeCompare(b.name);
+            });
+
+            let totalWeight = 0;
+
             return (
-                <div key={i} className={className}>
-                    <div className="mr-5">{item.key}:</div>
-                    <div>{item.value}</div>
+                <div className="flex flex-col">
+                    <div className="text-gray-200 text-base my-2">LORA:</div>
+                    {
+                        sd_info.loras.map((lora) => {
+                            totalWeight += lora.weight;
+                            return (
+                                <div className="grid grid-cols-4" key={lora.name}>
+                                    <div className="text-gray-200 col-span-3">{lora.name}</div>
+                                    <div className="col-span-1">{lora.weight}</div>
+                                </div>
+                            )
+                        })
+                    }
+                    <div className="grid grid-cols-4 text-gray-400">
+                        <div className="col-span-3">Total</div>
+                        <div className="col-span-1">{totalWeight.toFixed(1)}</div>
+                    </div>
                 </div>
             )
-        })
-    };
+        }
+    }
+
+    const formatSDInfo = (meta) => {
+        if (meta.sd_params) {
+            return (
+                <>
+                    {formatOptions(metadata.sd_params)}
+                    <div className="grid grid-cols-1">
+                        <div className="text-gray-200 text-base my-2">Prompt:</div>
+                        <div>{metadata.sd_params.prompt}</div>
+                        {
+                            metadata.sd_params.negative_prompt && (
+                                <>
+                                    <div className="text-gray-200 text-base my-2">Negative Prompt:</div>
+                                    <div>{metadata.sd_params.negative_prompt}</div>
+                                </>
+                            )
+                        }
+                        {
+                            // metadata.sd_params.template && (
+                            //     <>
+                            //         <div className="text-gray-200 text-base my-2">Template:</div>
+                            //         <div className="whitespace-pre-wrap">{metadata.sd_params.template}</div>
+                            //     </>
+                            // )
+                        }
+                        {
+                           formatLoraInfo(metadata.sd_params)
+                        }
+                    </div>
+                </>
+            )
+        }
+    }
 
     return (
         <div className="flex flex-col text-white text-xs">
-            {formatMetadata(metadata)}
+            <div className="grid grid-cols-2">
+                <div className="text-gray-300">Name</div>
+                <div>{metadata.name}</div>
+                <div className="text-gray-300">Size</div>
+                <div>{metadata.size}</div>
+            </div>
+            {formatSDInfo(metadata)}
         </div>
     )
 }

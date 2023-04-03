@@ -1,5 +1,5 @@
 export default function Nav(props) {
-    const { handles, index, rootPath, containerSize, jpegOpts } = props;
+    const { handles, index, rootPath, containerSize, jpegOpts, navRef } = props;
 
     let curIdxNew = index.cur + 1;
     if (curIdxNew > index.max) {
@@ -11,7 +11,7 @@ export default function Nav(props) {
     }
 
     return (
-        <nav className="navbar bg-primary text-white">
+        <nav className="navbar bg-primary text-white" ref={navRef}>
             <div className="flex-1 m-2 text-xl font-mono">Images: {rootPath}</div>
 
             <div className="navbar-end">
@@ -23,9 +23,12 @@ export default function Nav(props) {
                 </div>
 
                 <button className="btn btn-primary btn-sm" onClick={handles.prev} >Previous</button>
-                <div className="m-2 text-xl font-mono">{curIdxNew} / {index.max}</div>
-                <button className="btn btn-primary btn-sm" onClick={handles.next}>Next</button>
+                <div className="flex flex-col items-center mx-2">
+                    <div className="text-md font-mono">{curIdxNew}</div>
+                    <div className="text-md font-mono">{index.max}</div>
+                </div>
 
+                <button className="btn btn-primary btn-sm" onClick={handles.next}>Next</button>
                 <button className="btn btn-primary btn-sm" onClick={handles.delete} >Delete</button>
                 <button className="btn btn-primary btn-sm" onClick={handles.refresh} >Refresh</button>
             </div>

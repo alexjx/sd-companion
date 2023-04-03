@@ -4,6 +4,8 @@ import Nav from './Components/Nav'
 import Broswer from './Components/Broswer'
 import { useHotkeys } from 'react-hotkeys-hook'
 
+import './App.css'
+
 function App() {
     if (process.env.NODE_ENV === "development") {
         axios.defaults.baseURL = "http://localhost:9080";
@@ -14,8 +16,11 @@ function App() {
     const [curIdx, setCurIdx] = useState(0);
     const [toJpeg, setToJpeg] = useState(true);
 
+    const navRef = useRef(null);
     const containerRef = useRef(null);
     const [containerSize, setContainerSize] = useState({ height: 0, width: 0 });
+    const imageRef = useRef(null);
+
 
     const handleNext = () => {
         if (curIdx + 1 < files.length) {
@@ -75,18 +80,14 @@ function App() {
         if (containerRef.current === null) {
             return;
         }
-
         const updateSize = () => {
             setContainerSize({
                 height: containerRef.current.clientHeight,
                 width: containerRef.current.clientWidth,
             });
         };
-
         updateSize();
-
         window.addEventListener('resize', updateSize);
-
         return () => {
             window.removeEventListener('resize', updateSize);
         };
@@ -103,7 +104,7 @@ function App() {
     useHotkeys('r', fetchFiles);
 
     return (
-        <div className='flex flex-col h-screen justify-start items-center bg-gray-800'>
+        <div className='flex flex-col items-center bg-gray-800'>
             <Nav
                 handles={
                     {
@@ -127,6 +128,7 @@ function App() {
                         setToJpeg: setToJpeg,
                     }
                 }
+                navRef={navRef}
             />
             <Broswer
                 files={files}
@@ -135,6 +137,7 @@ function App() {
                 innerRef={containerRef}
                 containerSize={containerSize}
                 toJpeg={toJpeg}
+                imageRef={imageRef}
             />
         </div>
     )
