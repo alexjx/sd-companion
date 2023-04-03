@@ -4,7 +4,11 @@ export default function ImageView(props) {
     const { imageSrc } = props;
 
     return (
-        <TransformWrapper>
+        <TransformWrapper
+            doubleClick={{
+                mode: "reset",
+            }}
+        >
             <TransformComponent>
                 <div className="h-full" id="img-container">
                     <img
