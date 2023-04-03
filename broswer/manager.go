@@ -75,7 +75,7 @@ func (b *Broswer) Files() ([]*File, error) {
 
 		// ignore trash directory
 		fpath = filepath.Clean(fpath)
-		logrus.Infof("filepath: %q, trash: %q", fpath, b.trash)
+		// logrus.Infof("filepath: %q, trash: %q", fpath, b.trash)
 		if strings.HasPrefix(fpath, b.trash) {
 			return nil
 		}

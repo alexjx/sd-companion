@@ -10,14 +10,16 @@ export default function ImageView(props) {
                 }}
                 >
                 <TransformComponent
-                    wrapperClass="h-full"
-                    contentClass="h-full"
+                    wrapperClass="h-full-important"
+                    contentClass="h-full-important"
                 >
-                    <img
-                        src={imageSrc}
-                        className="h-full"
-                        ref={imageRef}
-                    />
+                    <div className="h-full-important">
+                        <img
+                            src={imageSrc}
+                            className="h-full-important object-contain"
+                            ref={imageRef}
+                            />
+                    </div>
                 </TransformComponent>
             </TransformWrapper>
     );
