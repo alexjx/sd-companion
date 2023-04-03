@@ -68,10 +68,11 @@ export default function Details(props) {
                     });
                 }
                 if (template) {
+                    // tempalte has newlines, we need to preserve
                     metadata.push({
                         key: "Template",
                         value: template,
-                        type: 2, // block
+                        type: 3, // block
                     });
                 }
 
@@ -89,8 +90,23 @@ export default function Details(props) {
     const formatMetadata = (metadata) => {
         // map keys for div pairs
         return metadata.map((item, i) => {
+            let className;
+            switch (item.type) {
+                case 1:
+                    className = "grid grid-cols-2";
+                    break;
+                case 2:
+                    className = "flex flex-col";
+                    break;
+                case 3:
+                    className = "flex flex-col whitespace-pre-wrap";
+                    break;
+                default:
+                    className = "grid grid-cols-2";
+                    break;
+            }
             return (
-                <div key={i} className={item.type === 1 ? "grid grid-cols-2" : "flex flex-col"}>
+                <div key={i} className={className}>
                     <div className="mr-5">{item.key}:</div>
                     <div>{item.value}</div>
                 </div>

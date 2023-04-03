@@ -9,13 +9,17 @@ export default function Broswer(props) {
     const [imgSrc, setImgSrc] = useState(null);
 
     function contentUrl(file) {
+        let prefix = ''
+        if (root) {
+            prefix = `${root}`
+        }
+
         if (!toJpeg) {
-            console.log('not to jpeg')
-            return `${root}/files/${file.path}`
+            return `${prefix}/files/${file.path}`
         }
         // path need to be url escaped
         const escapedPath = encodeURIComponent(file.path)
-        return `${root}/api/encoded?path=${file.path}&height=${containerSize.height}`
+        return `${prefix}/api/encoded?path=${file.path}&height=${containerSize.height}`
     }
 
     useEffect(() => {
