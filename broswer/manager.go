@@ -4,6 +4,9 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Broswer struct {
@@ -14,14 +17,24 @@ type Broswer struct {
 
 	// extsFilter is the extensions of the files
 	extsFilter map[string]struct{}
+
+	// trash is the trash directory
+	trash string
 }
 
 func NewBroswer(root string, exts []string) *Broswer {
 	root = path.Clean(root)
 
+	// ensure trash directory exists
+	trash := path.Join(root, ".trash")
+	if err := os.MkdirAll(trash, 0755); err != nil {
+		logrus.Errorf("create trash directory %s error: %v", trash, err)
+	}
+
 	// create extensions filter
 	extsFilter := make(map[string]struct{})
 	for _, ext := range exts {
+		ext = strings.ToLower(ext)
 		extsFilter[ext] = struct{}{}
 	}
 
@@ -29,6 +42,7 @@ func NewBroswer(root string, exts []string) *Broswer {
 		root:       root,
 		skipLength: len(root),
 		extsFilter: extsFilter,
+		trash:      trash,
 	}
 
 	return b
@@ -39,9 +53,12 @@ func (b *Broswer) GetRoot() string {
 }
 
 func (b *Broswer) Files() ([]*File, error) {
-	var files []*File
+	files := []*File{}
+
 	err := filepath.Walk(b.root, func(filepath string, info os.FileInfo, err error) error {
 		if err != nil {
+			logrus.Errorf("walk path %s error: %v", filepath, err)
+
 			// ignore permission denied error
 			if os.IsPermission(err) {
 				return nil
@@ -49,12 +66,18 @@ func (b *Broswer) Files() ([]*File, error) {
 			return err
 		}
 
+		// ignore trash directory
+		if strings.HasPrefix(filepath, b.trash) {
+			return nil
+		}
+
 		if !info.IsDir() {
 			// normalize the path relative to the root
-			relativePath := filepath[b.skipLength:]
+			relativePath := filepath[b.skipLength+1:]
 
 			// filter the file by extension
 			ext := path.Ext(relativePath)
+			ext = strings.ToLower(ext[1:]) // remove the dot
 			if _, ok := b.extsFilter[ext]; !ok {
 				return nil
 			}
@@ -67,7 +90,9 @@ func (b *Broswer) Files() ([]*File, error) {
 		}
 		return nil
 	})
+
 	if err != nil {
+		logrus.Errorf("walk path %s error: %v", b.root, err)
 		return nil, err
 	}
 
@@ -77,7 +102,12 @@ func (b *Broswer) Files() ([]*File, error) {
 func (b *Broswer) Delete(p string) error {
 	// normalize the path relative to the root
 	filepath := path.Join(b.root, p)
-	return os.Remove(filepath)
+	trashPath := path.Join(b.trash, p)
+	if err := os.MkdirAll(path.Dir(trashPath), 0755); err != nil {
+		logrus.Errorf("create trash directory %s error: %v", path.Dir(trashPath), err)
+		return err
+	}
+	return os.Rename(filepath, trashPath)
 }
 
 func (b *Broswer) Content(p string) ([]byte, error) {

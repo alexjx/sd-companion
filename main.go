@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/alexjx/sd-companion/cmd"
 	"github.com/sirupsen/logrus"
 	cli "github.com/urfave/cli/v3"
 )
@@ -20,15 +21,15 @@ var (
 
 func main() {
 	app := cli.App{
-		Name:                  "aws-vpcflow",
-		Usage:                 "aws-vpcflow is a tool to parse vpcflow logs",
+		Name:                  "sd-companion",
+		Usage:                 "sd-companion is a tool to broswer images",
 		EnableShellCompletion: true,
 		ExitErrHandler: func(cctx *cli.Context, err error) {
 			cli.HandleExitCoder(err)
 		},
 		Version: Version,
 		Commands: []*cli.Command{
-
+			cmd.ServeCmd,
 		},
 	}
 

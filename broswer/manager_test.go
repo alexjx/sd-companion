@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/alexjx/image-browser/broswer"
+	"github.com/alexjx/sd-companion/broswer"
 )
 
 func TestBroswer(t *testing.T) {
