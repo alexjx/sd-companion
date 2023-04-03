@@ -25,7 +25,7 @@ pages:
 build:
 	go build -o bin/sd-companion -ldflags "$(LDFLAGS)" main.go
 
-compile:
+compile: pages
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/sd-companion-linux-amd64 -ldflags "$(LDFLAGS)" main.go
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o bin/sd-companion-windows-amd64.exe -ldflags "$(LDFLAGS)" main.go
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o bin/sd-companion-darwin-amd64 -ldflags "$(LDFLAGS)" main.go
+	# CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o bin/sd-companion-darwin-amd64 -ldflags "$(LDFLAGS)" main.go
