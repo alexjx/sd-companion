@@ -38,6 +38,12 @@ function App() {
         }
     }
 
+    const handleSetCurIdx = (idx) => {
+        if (idx >= 0 && idx < files.length) {
+            setCurIdx(idx);
+        }
+    }
+
     const handleDelete = () => {
         if (curIdx < files.length) {
             const f = files[curIdx];
@@ -112,6 +118,7 @@ function App() {
                         prev: handlePrev,
                         delete: handleDelete,
                         refresh: fetchFiles,
+                        setCurIdx: handleSetCurIdx,
                     }
                 }
                 index={

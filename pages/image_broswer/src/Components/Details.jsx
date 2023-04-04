@@ -118,11 +118,11 @@ export default function Details(props) {
 
     return (
         <div className="flex flex-col text-white text-xs">
-            <div className="grid grid-cols-2">
-                <div className="text-gray-300">Name</div>
-                <div>{metadata.name}</div>
-                <div className="text-gray-300">Size</div>
-                <div>{metadata.size}</div>
+            <div className="grid grid-cols-4">
+                <div className="col-span-1 text-gray-300">Name</div>
+                <div className="col-span-3">{metadata.name}</div>
+                <div className="col-span-1 text-gray-300">Size</div>
+                <div classname="col-span-3">{metadata.size}</div>
             </div>
             {formatSDInfo(metadata)}
         </div>

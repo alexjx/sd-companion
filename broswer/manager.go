@@ -4,6 +4,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -104,6 +105,10 @@ func (b *Broswer) Files() ([]*File, error) {
 		logrus.Errorf("walk path %s error: %v", b.root, err)
 		return nil, err
 	}
+
+	sort.Slice(files, func(i, j int) bool {
+		return files[i].ModifiedAt.Before(files[j].ModifiedAt)
+	})
 
 	return files, nil
 }

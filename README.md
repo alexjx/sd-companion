@@ -5,6 +5,9 @@ SD Companion is a web app for the Stable Diffusion, for better image browsing an
 ## Features
 
 - [x] Browse images in a folder
-- [ ] View image metadata
-- [ ] Browse images in raw format (toggleable)
-- [ ]
+- [x] View image metadata
+- [x] Browse images in raw format (toggleable)
+- [ ] SD Metadata listing
+- [ ] SD Metadata analysis
+- [x] Delete (transh can)
+- [ ] 
