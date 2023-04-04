@@ -31,8 +31,8 @@ export default function Details(props) {
             <>
                 {optKeys.map((key) => {
                     return (
-                        <div className="grid grid-cols-4" key={key}>
-                            <div className="col-span-1 text-gray-200">{key}</div>
+                        <div className="grid grid-cols-5" key={key}>
+                            <div className="col-span-2 text-gray-200">{key}</div>
                             <div className="col-span-3">{sd_info.options[key]}</div>
                         </div>
                     )
@@ -116,13 +116,32 @@ export default function Details(props) {
         }
     }
 
+    const handleCopyPropmpt = () => {
+        // reconsturct the prompt
+        let prompt = metadata.sd_params.prompt;
+        if (metadata.sd_params.negative_prompt) {
+            prompt += "\nNegative prompt: " + metadata.sd_params.negative_prompt;
+        }
+        if (metadata.sd_params.option_str) {
+            prompt += "\n" + metadata.sd_params.option_str;
+        }
+        navigator.clipboard.writeText(prompt);
+    }
+
     return (
         <div className="flex flex-col text-white text-xs">
-            <div className="grid grid-cols-4">
-                <div className="col-span-1 text-gray-300">Name</div>
-                <div className="col-span-3">{metadata.name}</div>
-                <div className="col-span-1 text-gray-300">Size</div>
-                <div classname="col-span-3">{metadata.size}</div>
+            {window.isSecureContext && metadata.sd_params && (
+                <button className="bg-gray-800 text-gray-300 rounded-md px-2 py-1 my-2" onClick={handleCopyPropmpt}>Copy Prompt</button>
+            )}
+            <div className="grid grid-cols-5">
+                <div className="col-span-2 text-gray-300">Name</div>
+                <div className="col-span-3">
+                    <a href={file && `/files/${file?.path}`}>{metadata.name}</a>
+                </div>
+                <div className="col-span-2 text-gray-300">Size</div>
+                <div classname="col-span-3">
+                    {metadata.size}
+                </div>
             </div>
             {formatSDInfo(metadata)}
         </div>

@@ -10,13 +10,6 @@ export default function Nav(props) {
         jpegOpts.setToJpeg(!jpegOpts.toJpeg);
     }
 
-    // handle enter key to set curIdx
-    const handleEnter = (e) => {
-        if (e.key === 'Enter') {
-            handles.setCurIdx(e.target.value - 1);
-        }
-    }
-
     const Pagination = () => {
         const [curIdx, setCurIdx] = useState(0);
 

@@ -10,4 +10,4 @@ SD Companion is a web app for the Stable Diffusion, for better image browsing an
 - [ ] SD Metadata listing
 - [ ] SD Metadata analysis
 - [x] Delete (transh can)
-- [ ] 
+- [ ] Add copy prompt

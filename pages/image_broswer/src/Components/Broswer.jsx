@@ -33,7 +33,7 @@ export default function Broswer(props) {
             <div className="mx-3">
                 {imgSrc && <ImageView imageSrc={imgSrc} imageRef={imageRef} />}
             </div>
-            <div className="mx-3 max-w-xs overflow-x-hidden overflow-y-auto" >
+            <div className="mx-3 max-w-sm overflow-x-hidden overflow-y-auto" >
                 <Details file={files? files[curIdx] : null} />
             </div>
         </div>

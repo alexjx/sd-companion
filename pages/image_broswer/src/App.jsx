@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
+import { useHotkeys } from 'react-hotkeys-hook'
+
 import Nav from './Components/Nav'
 import Broswer from './Components/Broswer'
-import { useHotkeys } from 'react-hotkeys-hook'
+import PopupAlert from './Components/Alert'
 
 import './App.css'
 

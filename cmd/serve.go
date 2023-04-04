@@ -30,7 +30,7 @@ var ServeCmd = &cli.Command{
 			Name:    "listen",
 			Aliases: []string{"l"},
 			Usage:   "address and port of the web application",
-			Value:   ":9080",
+			Value:   "127.0.0.1:9080",
 		},
 		&cli.StringSliceFlag{
 			Name:    "extensions",
