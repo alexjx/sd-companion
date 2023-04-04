@@ -31,9 +31,9 @@ export default function Details(props) {
             <>
                 {optKeys.map((key) => {
                     return (
-                        <div className="grid grid-cols-2" key={key}>
-                            <div className="text-gray-200">{key}</div>
-                            <div>{sd_info.options[key]}</div>
+                        <div className="grid grid-cols-4" key={key}>
+                            <div className="col-span-1 text-gray-200">{key}</div>
+                            <div className="col-span-3">{sd_info.options[key]}</div>
                         </div>
                     )
                 })}
@@ -49,6 +49,16 @@ export default function Details(props) {
             });
 
             let totalWeight = 0;
+
+            const weightColor = (weight) => {
+                if (weight < 1.0) {
+                    return "text-white";
+                } else if (weight < 1.5) {
+                    return "text-yellow-300";
+                } else {
+                    return "text-red-300";
+                }
+            }
 
             return (
                 <div className="flex flex-col">
@@ -66,7 +76,7 @@ export default function Details(props) {
                     }
                     <div className="grid grid-cols-4 text-gray-400">
                         <div className="col-span-3">Total</div>
-                        <div className="col-span-1">{totalWeight.toFixed(1)}</div>
+                        <div className={"col-span-1 "+weightColor(totalWeight)}>{totalWeight.toFixed(1)}</div>
                     </div>
                 </div>
             )

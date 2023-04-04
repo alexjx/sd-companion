@@ -1,3 +1,7 @@
+import { BsArrowBarLeft, BsArrowBarRight } from 'react-icons/bs';
+import { MdOutlineAutoDelete } from 'react-icons/md';
+import { IoRefreshCircleOutline } from 'react-icons/io5';
+
 export default function Nav(props) {
     const { handles, index, rootPath, containerSize, jpegOpts, navRef } = props;
 
@@ -22,15 +26,23 @@ export default function Nav(props) {
                     <div>Max W: {containerSize.width}</div>
                 </div>
 
-                <button className="btn btn-primary btn-sm" onClick={handles.prev} >Previous</button>
+                <button className="btn btn-primary btn-sm text-2xl font-black" onClick={handles.prev} >
+                    <BsArrowBarLeft />
+                </button>
                 <div className="flex flex-col items-center mx-2">
                     <div className="text-md font-mono">{curIdxNew}</div>
                     <div className="text-md font-mono">{index.max}</div>
                 </div>
 
-                <button className="btn btn-primary btn-sm" onClick={handles.next}>Next</button>
-                <button className="btn btn-primary btn-sm" onClick={handles.delete} >Delete</button>
-                <button className="btn btn-primary btn-sm" onClick={handles.refresh} >Refresh</button>
+                <button className="btn btn-primary btn-sm text-2xl font-black" onClick={handles.next}>
+                    <BsArrowBarRight />
+                </button>
+                <button className="btn btn-primary btn-sm text-2xl font-black" onClick={handles.delete} >
+                    <MdOutlineAutoDelete />
+                </button>
+                <button className="btn btn-primary btn-sm text-2xl font-black" onClick={handles.refresh} >
+                    <IoRefreshCircleOutline />
+                </button>
             </div>
         </nav>
     )
