@@ -19,7 +19,7 @@ export default function Nav(props) {
             <div className="flex-1 m-2 text-xl font-mono">Images: {rootPath}</div>
 
             <div className="navbar-end">
-                <div className="btn btn-primary btn-sm m-y-3" onClick={handleJpegToggle}>{jpegOpts.toJpeg ? 'Jpeg' : 'Original'}</div>
+                <div className="btn btn-primary btn-sm m-y-3" onClick={handleJpegToggle}>{jpegOpts.toJpeg ? 'JPEG' : 'ORIG'}</div>
 
                 <div className="flex flex-col text-sm m-y-3">
                     <div>Max H: {containerSize.height}</div>
