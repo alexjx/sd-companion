@@ -26,12 +26,19 @@ type Broswer struct {
 	quality int
 }
 
-func NewBroswer(root string, exts []string, quality int) *Broswer {
+func NewBroswer(root, trash string, exts []string, quality int) *Broswer {
 	root = filepath.Clean(root)
 	logrus.Infof("root path: %q", root)
 
 	// ensure trash directory exists
-	trash := filepath.Join(root, ".trash")
+	base := filepath.Base(root)
+	if trash == "" {
+		trash = filepath.Dir(root) + "_trash"
+	} else {
+		trash = filepath.Clean(trash)
+	}
+	trash = filepath.Join(trash, base)
+
 	if err := os.MkdirAll(trash, 0755); err != nil {
 		logrus.Errorf("create trash directory %s error: %v", trash, err)
 	}

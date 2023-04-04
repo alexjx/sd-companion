@@ -44,6 +44,10 @@ var ServeCmd = &cli.Command{
 			Usage:   "the quality of the jpeg image",
 			Value:   80,
 		},
+		&cli.StringFlag{
+			Name:  "trash",
+			Usage: "the trash directory",
+		},
 	},
 	Action: serveAction,
 }
@@ -53,6 +57,7 @@ type ServeConfig struct {
 	Listen  string
 	Ext     []string
 	Quality int
+	Transh  string
 }
 
 // NewEngine create a gin engine
@@ -202,7 +207,7 @@ func NewEngine(cfg *ServeConfig, b *broswer.Broswer) *gin.Engine {
 
 // NewBroswer create a broswer
 func NewBroswer(cfg *ServeConfig) *broswer.Broswer {
-	return broswer.NewBroswer(cfg.Root, cfg.Ext, cfg.Quality)
+	return broswer.NewBroswer(cfg.Root, cfg.Transh, cfg.Ext, cfg.Quality)
 }
 
 func serve(cfg *ServeConfig, engine *gin.Engine) {
@@ -217,6 +222,7 @@ func serveAction(cctx *cli.Context) error {
 		Listen:  cctx.String("listen"),
 		Ext:     cctx.StringSlice("extensions"),
 		Quality: cctx.Int("quality"),
+		Transh:  cctx.String("trash"),
 	}
 
 	fxApp := fx.New(
