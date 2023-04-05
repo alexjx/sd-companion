@@ -169,12 +169,12 @@ export default function Details(props) {
     return (
         <div className="flex flex-col text-white text-xs">
             {window.isSecureContext && metadata.sd_params && (
-                <button className="bg-gray-800 text-gray-300 rounded-md px-2 py-1 my-2" onClick={handleCopyPropmpt}>Copy Prompt</button>
+                <button className="text-white rounded-md border-dashed border-2 px-2 my-2" onClick={handleCopyPropmpt}>Copy Prompt</button>
             )}
             <div className="grid grid-cols-5">
                 <div className="col-span-2 text-gray-300">Name</div>
                 <div className="col-span-3">
-                    <a href={file && `/files/${file?.path}`}>{metadata.name}</a>
+                    <a href={file && `/files/${file?.path}`} target="_blank">{metadata.name}</a>
                 </div>
                 <div className="col-span-2 text-gray-300">Size</div>
                 <div className="col-span-3">

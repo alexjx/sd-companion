@@ -110,6 +110,7 @@ function App() {
     useHotkeys('right', handleNext);
     useHotkeys('delete', handleDelete);
     useHotkeys('r', fetchFiles);
+    useHotkeys('space', handleNext);
 
     return (
         <div className='flex flex-col items-center bg-gray-800'>

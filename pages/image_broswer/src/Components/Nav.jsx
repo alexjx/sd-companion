@@ -1,10 +1,12 @@
 import { BsArrowBarLeft, BsArrowBarRight } from 'react-icons/bs';
 import { MdOutlineAutoDelete } from 'react-icons/md';
 import { IoRefreshCircleOutline } from 'react-icons/io5';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 export default function Nav(props) {
     const { handles, index, rootPath, containerSize, jpegOpts, navRef } = props;
+
+    const curIdxRef = useRef(null);
 
     const handleJpegToggle = () => {
         jpegOpts.setToJpeg(!jpegOpts.toJpeg);
@@ -27,6 +29,8 @@ export default function Nav(props) {
                 if (i >= 0 && i < index.max) {
                     handles.setCurIdx(i);
                 }
+                // blur the input
+                curIdxRef.current.blur();
             }, 1000);
             return () => clearTimeout(timer);
         }, [curIdx]);
@@ -42,7 +46,7 @@ export default function Nav(props) {
                 </button>
 
                 <div className="flex flex-col items-center mx-2">
-                    <input type="text" value={curIdx} className="input input-ghost input-xs text-center text-white input-primary w-10 font-mono" onChange={handleChange} />
+                    <input type="text" value={curIdx} className="input input-ghost input-xs text-center text-white input-primary w-10 font-mono" onChange={handleChange} ref={curIdxRef} />
                     <input type="text" value={index.max} className="input input-ghost input-xs text-center text-white input-primary w-10 font-mono disabled" readOnly />
                 </div>
 
