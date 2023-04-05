@@ -4,7 +4,14 @@ import Details from "./Details";
 import ImageView from "./ImageView";
 
 export default function Broswer(props) {
-    const { files, root, curIdx, innerRef, containerSize, toJpeg, imageRef } = props;
+    const {
+        files,
+        root,
+        curIdx,
+        innerRef,
+        toJpeg,
+        imageRef,
+    } = props;
 
     const [imgSrc, setImgSrc] = useState(null);
 

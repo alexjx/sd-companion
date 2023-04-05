@@ -7,6 +7,7 @@ export default function Details(props) {
     } = props;
 
     const [metadata, setMetadata] = useState([]);
+    const [loraSet, setLoraSet] = useState(new Set());
 
     const fetchMetadata = (path) => {
         axios.get(`/api/metadata?path=${path}`)
@@ -43,10 +44,6 @@ export default function Details(props) {
 
     const formatLoraInfo = (sd_info) => {
         if (sd_info.loras) {
-            // sort by name, item in {name: xxx, weight: xxx}
-            sd_info.loras.sort((a, b) => {
-                return a.name.localeCompare(b.name);
-            });
 
             let totalWeight = 0;
 
@@ -60,25 +57,66 @@ export default function Details(props) {
                 }
             }
 
+            const handleLoraClick = (loraName) => {
+                if (loraSet.has(loraName)) {
+                    setLoraSet((loraSet) => {
+                        loraSet.delete(loraName);
+                        return new Set(loraSet);
+                    });
+                } else {
+                    setLoraSet((loraSet) => {
+                        loraSet.add(loraName);
+                        return new Set(loraSet);
+                    });
+                }
+            }
+
+            const formatLoraGroup = (group, groupStyle) => {
+                // sort by name, item in {name: xxx, weight: xxx}
+                group.sort((a, b) => {
+                    return a.name.localeCompare(b.name);
+                });
+
+                return (
+                    <>
+                        {
+                            group.map((lora) => {
+                                totalWeight += lora.weight;
+                                return (
+                                    <a href="#" onClick={() => handleLoraClick(lora.name)} key={lora.name}>
+                                        <div className={`grid grid-cols-4 ${groupStyle}`} key={lora.name}>
+                                            <div className="col-span-3">{lora.name}</div>
+                                            <div className="col-span-1">{lora.weight}</div>
+                                        </div>
+                                    </a>
+                                )
+                            })
+                        }
+                    </>
+                )
+            }
+
+            // group lora by common or not
+            let common = [];
+            let uncommon = [];
+            sd_info.loras.forEach((lora) => {
+                if (loraSet.has(lora.name)) {
+                    common.push(lora);
+                } else {
+                    uncommon.push(lora);
+                }
+            });
+
             return (
                 <div className="flex flex-col">
                     <div className="text-gray-200 text-base my-2">LORA:</div>
-                    {
-                        sd_info.loras.map((lora) => {
-                            totalWeight += lora.weight;
-                            return (
-                                <div className="grid grid-cols-4" key={lora.name}>
-                                    <div className="text-gray-200 col-span-3">{lora.name}</div>
-                                    <div className="col-span-1">{lora.weight}</div>
-                                </div>
-                            )
-                        })
-                    }
+                    {formatLoraGroup(common, "text-gray-400")}
+                    {formatLoraGroup(uncommon, "text-white")}
                     <div className="grid grid-cols-4 text-gray-400">
                         <div className="col-span-3">Total</div>
-                        <div className={"col-span-1 "+weightColor(totalWeight)}>{totalWeight.toFixed(1)}</div>
+                        <div className={"col-span-1 " + weightColor(totalWeight)}>{totalWeight.toFixed(1)}</div>
                     </div>
-                </div>
+                </div >
             )
         }
     }
@@ -108,7 +146,7 @@ export default function Details(props) {
                             // )
                         }
                         {
-                           formatLoraInfo(metadata.sd_params)
+                            formatLoraInfo(metadata.sd_params)
                         }
                     </div>
                 </>
@@ -139,7 +177,7 @@ export default function Details(props) {
                     <a href={file && `/files/${file?.path}`}>{metadata.name}</a>
                 </div>
                 <div className="col-span-2 text-gray-300">Size</div>
-                <div classname="col-span-3">
+                <div className="col-span-3">
                     {metadata.size}
                 </div>
             </div>

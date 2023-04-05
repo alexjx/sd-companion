@@ -144,7 +144,6 @@ function App() {
                 root={axios.defaults.baseURL}
                 curIdx={curIdx}
                 innerRef={containerRef}
-                containerSize={containerSize}
                 toJpeg={toJpeg}
                 imageRef={imageRef}
             />
