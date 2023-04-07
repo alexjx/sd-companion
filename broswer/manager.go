@@ -31,18 +31,10 @@ func NewBroswer(root, trash string, exts []string, quality int) *Broswer {
 	logrus.Infof("root path: %q", root)
 
 	// ensure trash directory exists
-	base := filepath.Base(root)
-	if trash == "" {
-		trash = filepath.Dir(root) + "_trash"
-	} else {
-		trash = filepath.Clean(trash)
-	}
-	trash = filepath.Join(trash, base)
-
+	trash = filepath.Clean(trash)
 	if err := os.MkdirAll(trash, 0755); err != nil {
 		logrus.Errorf("create trash directory %s error: %v", trash, err)
 	}
-	trash = filepath.Clean(trash)
 	logrus.Infof("trash path: %q", trash)
 
 	// create extensions filter

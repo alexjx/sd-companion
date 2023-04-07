@@ -9,6 +9,17 @@ export default function Details(props) {
     const [metadata, setMetadata] = useState([]);
     const [loraSet, setLoraSet] = useState(new Set());
 
+    // store loraset into localstorage
+    useEffect(() => {
+        const loraSetStr = localStorage.getItem("loraSet");
+        if (loraSetStr) {
+            setLoraSet(new Set(JSON.parse(loraSetStr)));
+        }
+    }, []);
+    useEffect(() => {
+        localStorage.setItem("loraSet", JSON.stringify(Array.from(loraSet)));
+    }, [loraSet]);
+
     const fetchMetadata = (path) => {
         axios.get(`/api/metadata?path=${path}`)
             .then(res => {

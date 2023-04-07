@@ -10,10 +10,11 @@ SD Companion is a web app for the Stable Diffusion, for better image browsing an
 - [x] SD Metadata
     - [x] Listing
     - [x] Lora Analysis, include weights.
-    - [ ] Save common lora list to local storage
+    - [x] Save common lora list to local storage
 - [x] Delete (transh can)
 - [x] Copy prompt
-- [ ] Mandate transh can path
+- [x] Seperate and mandate the transh can path
+- [ ] Rank folders
 
 
 ## Hotkeys
@@ -22,4 +23,3 @@ SD Companion is a web app for the Stable Diffusion, for better image browsing an
 - `Left Arrow` - Previous image
 - `Delete` - Delete image
 - `R` - Refresh image list
-

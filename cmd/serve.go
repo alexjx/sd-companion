@@ -45,8 +45,10 @@ var ServeCmd = &cli.Command{
 			Value:   80,
 		},
 		&cli.StringFlag{
-			Name:  "trash",
-			Usage: "the trash directory",
+			Name:     "trash",
+			Aliases:  []string{"t"},
+			Usage:    "the trash directory",
+			Required: true,
 		},
 	},
 	Action: serveAction,
