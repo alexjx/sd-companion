@@ -59,7 +59,7 @@ type ServeConfig struct {
 	Listen  string
 	Ext     []string
 	Quality int
-	Transh  string
+	Trash   string
 }
 
 // NewEngine create a gin engine
@@ -96,8 +96,10 @@ func NewEngine(cfg *ServeConfig, b *broswer.Broswer) *gin.Engine {
 			})
 		})
 
+		// query regular files
 		api.GET("/files", func(c *gin.Context) {
-			files, err := b.Files()
+			dir := c.Query("dir")
+			files, err := b.Files(dir)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error": err.Error(),
@@ -110,6 +112,51 @@ func NewEngine(cfg *ServeConfig, b *broswer.Broswer) *gin.Engine {
 			})
 		})
 
+		api.GET("/folders", func(c *gin.Context) {
+			folders, err := b.Folders()
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": err.Error(),
+				})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{
+				"folders": folders,
+			})
+		})
+
+		// query trash files
+		api.GET("/trash_files", func(c *gin.Context) {
+			dir := c.Query("dir")
+			files, err := b.TrashFiles(dir)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": err.Error(),
+				})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{
+				"files": files,
+			})
+		})
+
+		api.GET("/trash_folders", func(c *gin.Context) {
+			folders, err := b.TrashFolders()
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": err.Error(),
+				})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{
+				"folders": folders,
+			})
+		})
+
+		// delete
 		api.DELETE("/file", func(c *gin.Context) {
 			path := c.Query("path")
 			if path == "" {
@@ -132,6 +179,25 @@ func NewEngine(cfg *ServeConfig, b *broswer.Broswer) *gin.Engine {
 			})
 		})
 
+		// restore
+		api.PUT("/file", func(c *gin.Context) {
+			path := c.Query("path")
+			if path == "" {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"error": "path is required",
+				})
+				return
+			}
+
+			err := b.Restore(path)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": err.Error(),
+				})
+				return
+			}
+		})
+
 		api.GET("/metadata", func(c *gin.Context) {
 			path := c.Query("path")
 			if path == "" {
@@ -141,7 +207,12 @@ func NewEngine(cfg *ServeConfig, b *broswer.Broswer) *gin.Engine {
 				return
 			}
 
-			metadata, err := b.Metadata(path)
+			inTrash := false
+			if c.Query("trash") != "" {
+				inTrash = true
+			}
+
+			metadata, err := b.Metadata(path, inTrash)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error": err.Error(),
@@ -187,7 +258,12 @@ func NewEngine(cfg *ServeConfig, b *broswer.Broswer) *gin.Engine {
 				width = int(ww)
 			}
 
-			encoded, err := b.Encoded(path, height, width)
+			inTrash := false
+			if c.Query("trash") != "" {
+				inTrash = true
+			}
+
+			encoded, err := b.Encoded(path, height, width, inTrash)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error": err.Error(),
@@ -204,12 +280,17 @@ func NewEngine(cfg *ServeConfig, b *broswer.Broswer) *gin.Engine {
 		files.StaticFS("/", http.Dir(cfg.Root))
 	}
 
+	trash := r.Group("/trash")
+	{
+		trash.StaticFS("/", http.Dir(cfg.Trash))
+	}
+
 	return r
 }
 
 // NewBroswer create a broswer
 func NewBroswer(cfg *ServeConfig) *broswer.Broswer {
-	return broswer.NewBroswer(cfg.Root, cfg.Transh, cfg.Ext, cfg.Quality)
+	return broswer.NewBroswer(cfg.Root, cfg.Trash, cfg.Ext, cfg.Quality)
 }
 
 func serve(cfg *ServeConfig, engine *gin.Engine) {
@@ -224,7 +305,7 @@ func serveAction(cctx *cli.Context) error {
 		Listen:  cctx.String("listen"),
 		Ext:     cctx.StringSlice("extensions"),
 		Quality: cctx.Int("quality"),
-		Transh:  cctx.String("trash"),
+		Trash:   cctx.String("trash"),
 	}
 
 	fxApp := fx.New(

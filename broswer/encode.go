@@ -76,10 +76,10 @@ func encodeFromJpg(img *ImageFile, w, h, q int) (*EncodedImage, error) {
 	return encodeIntoJpeg(im, w, h, q)
 }
 
-func (b *Broswer) Encoded(p string, width, height int) (*EncodedImage, error) {
+func (b *Broswer) Encoded(p string, width, height int, trash bool) (*EncodedImage, error) {
 	logrus.Debugf("encode image: %s into %d x %d", p, width, height)
 	// load image
-	img, err := b.Open(p)
+	img, err := b.Open(p, trash)
 	if err != nil {
 		return nil, err
 	}

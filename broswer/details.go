@@ -146,8 +146,8 @@ func readPngMetadata(img *ImageFile, size int, md *Metadata) error {
 	return nil
 }
 
-func (b *Broswer) Metadata(p string) (*Metadata, error) {
-	img, err := b.Open(p)
+func (b *Broswer) Metadata(p string, trash bool) (*Metadata, error) {
+	img, err := b.Open(p, trash)
 	if err != nil {
 		return nil, err
 	}

@@ -4,6 +4,7 @@ import axios from "axios";
 export default function Details(props) {
     const {
         file,
+        fromTrash,
     } = props;
 
     const [metadata, setMetadata] = useState([]);
@@ -21,7 +22,12 @@ export default function Details(props) {
     }, [loraSet]);
 
     const fetchMetadata = (path) => {
-        axios.get(`/api/metadata?path=${path}`)
+        let url = `/api/metadata?path=${path}`;
+        if (fromTrash) {
+            url = `/api/metadata?path=${path}&trash=1`;
+        }
+
+        axios.get(url)
             .then(res => {
                 setMetadata(res.data.metadata);
             })
@@ -29,6 +35,16 @@ export default function Details(props) {
                 console.log(err);
             });
     };
+
+    const fileUrl = (f) => {
+        if (!f) {
+            return "";
+        }
+        if (fromTrash) {
+            return `/trash/${f.path}`;
+        }
+        return `/files/${f.path}`;
+    }
 
     useEffect(() => {
         if (file) {
@@ -185,7 +201,7 @@ export default function Details(props) {
             <div className="grid grid-cols-5">
                 <div className="col-span-2 text-gray-300">Name</div>
                 <div className="col-span-3">
-                    <a href={file && `/files/${file?.path}`} target="_blank">{metadata.name}</a>
+                    <a href={file && fileUrl(file)} target="_blank">{metadata.name}</a>
                 </div>
                 <div className="col-span-2 text-gray-300">Size</div>
                 <div className="col-span-3">

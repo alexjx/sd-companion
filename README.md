@@ -14,8 +14,10 @@ SD Companion is a web app for the Stable Diffusion, for better image browsing an
 - [x] Delete (transh can)
 - [x] Copy prompt
 - [x] Seperate and mandate the transh can path
-- [ ] Rank folders
-
+- [ ] Search by file name
+- [x] Support folders
+    - [x] Choose from a list of folders under root
+    - [x] Switching from trash can
 
 ## Hotkeys
 

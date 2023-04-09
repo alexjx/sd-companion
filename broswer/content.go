@@ -17,9 +17,16 @@ func (i *ImageFile) Ext() string {
 	return path.Ext(i.Name)
 }
 
-func (b *Broswer) Open(p string) (*ImageFile, error) {
+func (b *Broswer) Open(p string, trash bool) (*ImageFile, error) {
 	p = filepath.FromSlash(p)
-	fPath := path.Join(b.root, p)
+
+	var fPath string
+	if trash {
+		fPath = path.Join(b.trash, p)
+	} else {
+		fPath = path.Join(b.root, p)
+	}
+
 	f, err := os.Open(fPath)
 	if err != nil {
 		return nil, err

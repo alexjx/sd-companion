@@ -13,7 +13,8 @@ function App() {
         axios.defaults.baseURL = "http://localhost:9080";
     }
 
-    const [rootPath, setRootPath] = useState('');
+    const [currentDir, setCurrentDir] = useState("/")
+    const [fromTrash, setFromTrash] = useState(false)
     const [files, setFiles] = useState([]);
     const [curIdx, setCurIdx] = useState(0);
     const [toJpeg, setToJpeg] = useState(true);
@@ -49,41 +50,46 @@ function App() {
     const handleDelete = () => {
         if (curIdx < files.length) {
             const f = files[curIdx];
-            axios.delete(`/api/file?path=${f.path}`)
-            .then(res => {
-                fetchFiles();
-            })
+            if (!fromTrash) {
+                axios.delete(`/api/file?path=${f.path}`)
+                    .then(res => {
+                        fetchFiles();
+                    })
+            } else {
+                axios.put(`/api/file?path=${f.path}`)
+                    .then(res => {
+                        fetchFiles();
+                    })
+            }
         }
     }
 
-    function fetchRootPath() {
-        axios.get(`/api/root`)
-            .then(res => {
-                setRootPath(res.data.root);
-            })
-            .catch(err => {
-                setRootPath('');
-            });
-    }
-
     function fetchFiles() {
-        axios.get(`/api/files`)
-            .then(res => {
-                setFiles(res.data.files);
-            })
-            .catch(err => {
-                // FIXME: alert user
-                console.log(err);
-            });
+        if (fromTrash) {
+            axios.get(`/api/trash_files?dir=${currentDir}`)
+                .then(res => {
+                    setFiles(res.data.files);
+                })
+                .catch(err => {
+                    // FIXME: alert user
+                    console.log(err);
+                });
+        } else {
+            axios.get(`/api/files?dir=${currentDir}`)
+                .then(res => {
+                    setFiles(res.data.files);
+                })
+                .catch(err => {
+                    // FIXME: alert user
+                    console.log(err);
+                });
+        }
     }
 
     // use effect to fetch issues
     useEffect(() => {
         fetchFiles();
-    }, []);
-    useEffect(() => {
-        fetchRootPath();
-    }, []);
+    }, [currentDir, fromTrash]);
     useEffect(() => {
         if (containerRef.current === null) {
             return;
@@ -130,7 +136,20 @@ function App() {
                         max: files.length,
                     }
                 }
-                rootPath={rootPath}
+                currentDir={
+                    {
+                        cur: currentDir,
+                        set: (dir) => {
+                            setCurrentDir(dir);
+                            setCurIdx(0);
+                        },
+                        fromTrash: fromTrash,
+                        setFromTrash: (trash) => {
+                            setFromTrash(trash);
+                            setCurIdx(0);
+                        },
+                    }
+                }
                 containerSize={containerSize}
                 jpegOpts={
                     {
@@ -147,6 +166,7 @@ function App() {
                 innerRef={containerRef}
                 toJpeg={toJpeg}
                 imageRef={imageRef}
+                fromTrash={fromTrash}
             />
         </div>
     )

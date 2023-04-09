@@ -11,6 +11,7 @@ export default function Broswer(props) {
         innerRef,
         toJpeg,
         imageRef,
+        fromTrash,
     } = props;
 
     const [imgSrc, setImgSrc] = useState(null);
@@ -22,11 +23,18 @@ export default function Broswer(props) {
         }
 
         if (!toJpeg) {
-            return `${prefix}/files/${file.path}`
+            if (!fromTrash) {
+                return `${prefix}/files/${file.path}`
+            }
+            return `${prefix}/trash/${file.path}`
         }
+
         // path need to be url escaped
         const escapedPath = encodeURIComponent(file.path)
-        return `${prefix}/api/encoded?path=${escapedPath}`
+        if (!fromTrash) {
+            return `${prefix}/api/encoded?path=${escapedPath}`
+        }
+        return `${prefix}/api/encoded?path=${escapedPath}&trash=1`
     }
 
     useEffect(() => {
@@ -41,7 +49,7 @@ export default function Broswer(props) {
                 {imgSrc && <ImageView imageSrc={imgSrc} imageRef={imageRef} />}
             </div>
             <div className="mx-3 max-w-sm overflow-x-hidden overflow-y-auto" >
-                <Details file={files? files[curIdx] : null} />
+                <Details file={files ? files[curIdx] : null} fromTrash={fromTrash} />
             </div>
         </div>
     )

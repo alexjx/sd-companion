@@ -14,13 +14,14 @@ type Broswer struct {
 	// root is the root directory of the Broswer
 	root string
 	// skipLength is the length of the root path
-	skipLength int
+	rootSkipLength int
 
 	// extsFilter is the extensions of the files
 	extsFilter map[string]struct{}
 
 	// trash is the trash directory
-	trash string
+	trash           string
+	trashSkipLength int
 
 	// jpeg quality
 	quality int
@@ -45,11 +46,12 @@ func NewBroswer(root, trash string, exts []string, quality int) *Broswer {
 	}
 
 	b := &Broswer{
-		root:       root,
-		skipLength: len(root),
-		extsFilter: extsFilter,
-		trash:      trash,
-		quality:    quality,
+		root:            root,
+		rootSkipLength:  len(root),
+		extsFilter:      extsFilter,
+		trash:           trash,
+		trashSkipLength: len(trash),
+		quality:         quality,
 	}
 
 	return b
@@ -59,10 +61,16 @@ func (b *Broswer) GetRoot() string {
 	return b.root
 }
 
-func (b *Broswer) Files() ([]*File, error) {
+func (b *Broswer) files(root, folder string, skipLen int) ([]*File, error) {
 	files := []*File{}
 
-	err := filepath.Walk(b.root, func(fpath string, info os.FileInfo, err error) error {
+	targetDir := root
+	if folder != "" {
+		targetDir = filepath.Join(root, folder)
+		targetDir = filepath.Clean(targetDir)
+	}
+
+	err := filepath.Walk(targetDir, func(fpath string, info os.FileInfo, err error) error {
 		if err != nil {
 			logrus.Errorf("walk path %s error: %v", fpath, err)
 
@@ -75,14 +83,10 @@ func (b *Broswer) Files() ([]*File, error) {
 
 		// ignore trash directory
 		fpath = filepath.Clean(fpath)
-		// logrus.Infof("filepath: %q, trash: %q", fpath, b.trash)
-		if strings.HasPrefix(fpath, b.trash) {
-			return nil
-		}
 
 		if !info.IsDir() {
 			// normalize the path relative to the root
-			relativePath := fpath[b.skipLength+1:]
+			relativePath := fpath[skipLen+1:]
 
 			// filter the file by extension
 			ext := path.Ext(relativePath)
@@ -112,6 +116,49 @@ func (b *Broswer) Files() ([]*File, error) {
 	return files, nil
 }
 
+func (b *Broswer) folders(root string, skipLen int) ([]string, error) {
+	var folders []string
+
+	err := filepath.Walk(root, func(fpath string, info os.FileInfo, err error) error {
+		if err != nil {
+			logrus.Errorf("notify walk path %s error: %v", fpath, err)
+			return err
+		}
+
+		if info.IsDir() {
+			// trim root prefix
+			if fpath == root {
+				return nil
+			}
+			fpath = fpath[skipLen+1:]
+			folders = append(folders, fpath)
+		}
+		return nil
+	})
+	if err != nil {
+		logrus.Errorf("walk path %s error: %v", b.root, err)
+		return nil, err
+	}
+
+	return folders, nil
+}
+
+func (b *Broswer) Files(folder string) ([]*File, error) {
+	return b.files(b.root, folder, b.rootSkipLength)
+}
+
+func (b *Broswer) Folders() ([]string, error) {
+	return b.folders(b.root, b.rootSkipLength)
+}
+
+func (b *Broswer) TrashFiles(d string) ([]*File, error) {
+	return b.files(b.trash, d, b.trashSkipLength)
+}
+
+func (b *Broswer) TrashFolders() ([]string, error) {
+	return b.folders(b.trash, b.trashSkipLength)
+}
+
 func (b *Broswer) Delete(p string) error {
 	// normalize the path relative to the root
 	filepath := path.Join(b.root, p)
@@ -121,4 +168,11 @@ func (b *Broswer) Delete(p string) error {
 		return err
 	}
 	return os.Rename(filepath, trashPath)
+}
+
+func (b *Broswer) Restore(p string) error {
+	// normalize the path relative to the root
+	filepath := path.Join(b.root, p)
+	trashPath := path.Join(b.trash, p)
+	return os.Rename(trashPath, filepath)
 }

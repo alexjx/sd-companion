@@ -2,9 +2,17 @@ import { BsArrowBarLeft, BsArrowBarRight } from 'react-icons/bs';
 import { MdOutlineAutoDelete } from 'react-icons/md';
 import { IoRefreshCircleOutline } from 'react-icons/io5';
 import { useEffect, useState, useRef } from 'react';
+import axios from 'axios';
 
 export default function Nav(props) {
-    const { handles, index, rootPath, containerSize, jpegOpts, navRef } = props;
+    const {
+        handles,
+        index,
+        currentDir,
+        containerSize,
+        jpegOpts,
+        navRef,
+    } = props;
 
     const curIdxRef = useRef(null);
 
@@ -57,10 +65,87 @@ export default function Nav(props) {
         )
     };
 
-    return (
-        <nav className="navbar bg-primary text-white" ref={navRef}>
-            <div className="flex-1 m-2 text-xl font-mono">Images: {rootPath}</div>
+    const CurrentDirectory = () => {
+        const [folders, setFolders] = useState([]);
+        const [trashFolders, setTrashFolders] = useState([]);
 
+        const fetchFolders = () => {
+            axios.get('/api/folders')
+                .then(res => {
+                    const folders = res.data.folders;
+                    folders.unshift('/');
+                    setFolders(folders);
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+        }
+        const fetchTrashFolders = () => {
+            axios.get('/api/trash_folders')
+                .then(res => {
+                    const folders = res.data.folders;
+                    folders.unshift('/');
+                    setTrashFolders(folders);
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+        };
+
+        useEffect(() => {
+            fetchFolders();
+            fetchTrashFolders();
+        }, []);
+
+        const handleFolderChange = (path, fromTrash) => {
+            currentDir.set(path);
+            currentDir.setFromTrash(fromTrash);
+
+            const elem = document.activeElement;
+            if (elem) {
+                elem?.blur();
+            }
+        };
+
+        return (
+            <div className="flex-1 m-2 text-xl font-mono">Images:
+                <div className="dropdown">
+                    <label tabIndex={0} className="btn btn-ghost">
+                        <div className='flex-1 overflow-clip'>
+                            {currentDir.cur} {currentDir.fromTrash && <span className='text-red-500'> (trash)</span>}
+                        </div>
+                    </label>
+                    <ul tabIndex={0} className="dropdown-content menu text-sm whitespace-nowrap p-2 bg-primary border-dashed w-auto">
+                        {folders.map((folder) => {
+                            return (
+                                <li key={folder} className='hover:bg-accent' onClick={() => handleFolderChange(folder, false)}>
+                                    <div className="flex flex-row py-0">
+                                        <div className="flex-1 text-left">{folder}</div>
+                                    </div>
+                                </li>
+                            )
+                        })}
+                        {trashFolders.map((folder) => {
+                            return (
+                                <li key={folder} className='hover:bg-accent' onClick={() => handleFolderChange(folder, true)}>
+                                    <div className="flex flex-row py-0">
+                                        <div className="flex-1 text-left">{folder}</div>
+                                        <div className="flex-1 text-right text-red-500">trash</div>
+                                    </div>
+                                </li>
+                            )
+                        })}
+                    </ul>
+                </div>
+            </div>
+        )
+    };
+
+    return (
+        <nav className="navbar bg-primary text-white py-0" ref={navRef}>
+            <div className="flex flex-1">
+                {CurrentDirectory()}
+            </div>
             <div className="navbar-end">
                 <div className="btn btn-primary btn-sm m-y-3" onClick={handleJpegToggle}>{jpegOpts.toJpeg ? 'JPEG' : 'ORIG'}</div>
 
