@@ -54,8 +54,8 @@ export default function Nav(props) {
                 </button>
 
                 <div className="flex flex-col items-center mx-2">
-                    <input type="text" value={curIdx} className="input input-ghost input-xs text-center text-white input-primary w-10 font-mono" onChange={handleChange} ref={curIdxRef} />
-                    <input type="text" value={index.max} className="input input-ghost input-xs text-center text-white input-primary w-10 font-mono disabled" readOnly />
+                    <input type="text" value={curIdx} className="input input-ghost input-xs text-center text-white input-primary w-12 font-mono" onChange={handleChange} ref={curIdxRef} />
+                    <input type="text" value={index.max} className="input input-ghost input-xs text-center text-white input-primary w-12 font-mono disabled" readOnly />
                 </div>
 
                 <button className="btn btn-primary btn-sm text-2xl font-black" onClick={handles.next}>

@@ -85,6 +85,12 @@ func (b *Broswer) files(root, folder string, skipLen int) ([]*File, error) {
 		fpath = filepath.Clean(fpath)
 
 		if !info.IsDir() {
+			// REVISIT: this is a bug, we should not have this,
+			// if the root is a link to a directory
+			if fpath == root {
+				return nil
+			}
+
 			// normalize the path relative to the root
 			relativePath := fpath[skipLen+1:]
 
