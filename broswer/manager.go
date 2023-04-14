@@ -116,7 +116,7 @@ func (b *Broswer) files(root, folder string, skipLen int) ([]*File, error) {
 	}
 
 	sort.Slice(files, func(i, j int) bool {
-		return files[i].ModifiedAt.Before(files[j].ModifiedAt)
+		return files[i].Path < files[j].Path
 	})
 
 	return files, nil
