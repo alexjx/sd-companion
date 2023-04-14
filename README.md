@@ -21,7 +21,7 @@ SD Companion is a web app for the Stable Diffusion, for better image browsing an
 
 ## Hotkeys
 
-- `Right Arrow` / `Space` - Next image
+- `Right Arrow` / `f` - Next image
 - `Left Arrow` - Previous image
-- `Delete` - Delete image
-- `R` - Refresh image list
+- `Delete` / `D` - Delete image
+- `r` - Refresh image list
