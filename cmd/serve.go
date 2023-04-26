@@ -263,7 +263,7 @@ func NewEngine(cfg *ServeConfig, b *broswer.Broswer) *gin.Engine {
 				inTrash = true
 			}
 
-			encoded, err := b.Encoded(path, height, width, inTrash)
+			encoded, err := b.Encoded(path, width, height, inTrash)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error": err.Error(),

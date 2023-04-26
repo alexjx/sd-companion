@@ -117,7 +117,8 @@ function App() {
     useHotkeys('delete', handleDelete);
     useHotkeys('r', fetchFiles);
     useHotkeys('f', handleNext);
-    useHotkeys('D', handleDelete);
+    useHotkeys('s', handlePrev)
+    useHotkeys('shift+d', handleDelete);
 
     return (
         <div className='flex flex-col items-center bg-gray-800'>
@@ -168,6 +169,7 @@ function App() {
                 toJpeg={toJpeg}
                 imageRef={imageRef}
                 fromTrash={fromTrash}
+                containerSize={containerSize}
             />
         </div>
     )

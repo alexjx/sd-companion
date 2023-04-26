@@ -21,16 +21,13 @@ type EncodedImage struct {
 	Height int
 }
 
-func encodeIntoJpeg(im image.Image, h, w, q int) (*EncodedImage, error) {
+func encodeIntoJpeg(im image.Image, w, h, q int) (*EncodedImage, error) {
 	// resize respect to the ratio
 	originalWidth := im.Bounds().Dx()
 	originalHeight := im.Bounds().Dy()
-	if w > originalWidth {
-		w = originalWidth
-	}
-	if h > originalHeight {
-		h = originalHeight
-	}
+	ratio := float64(originalWidth) / float64(originalHeight)
+	logrus.Debugf("originalWidth: %d, originalHeight: %d, ratio: %f requested w: %d, h: %d", originalWidth, originalHeight, ratio, w, h)
+
 	if w == 0 && h != 0 {
 		w = originalWidth * h / originalHeight
 	} else if h == 0 && w != 0 {
@@ -38,7 +35,15 @@ func encodeIntoJpeg(im image.Image, h, w, q int) (*EncodedImage, error) {
 	} else if w == 0 && h == 0 {
 		w = originalWidth
 		h = originalHeight
+	} else {
+		// resize respect to the ratio
+		if float64(w)/float64(h) > ratio {
+			w = int(float64(h) * ratio)
+		} else {
+			h = int(float64(w) / ratio)
+		}
 	}
+	logrus.Debugf("w: %d, h: %d", w, h)
 
 	resized := transform.Resize(im, w, h, transform.Linear)
 
