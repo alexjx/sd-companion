@@ -50,7 +50,8 @@ function App() {
             const f = files[curIdx];
             axios.delete(`/api/file?path=${f.path}`)
                 .then(res => {
-                    fetchFiles();
+                    // fetchFiles();
+                    setFiles(files.filter((file) => file.path !== f.path));
                 })
         }
     }
@@ -135,6 +136,14 @@ function App() {
                     }
                 }
                 navRef={navRef}
+                currentFileFn={
+                    () => {
+                        if (files.length == 0) {
+                            return "";
+                        }
+                        return files[curIdx].path;
+                    }
+                }
             />
             <Broswer
                 files={files}

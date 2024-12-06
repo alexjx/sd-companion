@@ -12,6 +12,7 @@ export default function Nav(props) {
         containerSize,
         jpegOpts,
         navRef,
+        currentFileFn,
     } = props;
 
     const curIdxRef = useRef(null);
@@ -121,6 +122,12 @@ export default function Nav(props) {
         <nav className="navbar bg-primary text-white py-0" ref={navRef}>
             <div className="flex flex-1">
                 {CurrentDirectory()}
+            </div>
+            <div className="flex-1">
+                {
+                    // show current file name
+                    currentFileFn()
+                }
             </div>
             <div className="navbar-end">
                 <div className="btn btn-primary btn-sm m-y-3" onClick={handleJpegToggle}>{jpegOpts.toJpeg ? 'JPEG' : 'ORIG'}</div>
