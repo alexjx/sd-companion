@@ -11,7 +11,6 @@ export default function Broswer(props) {
         innerRef,
         toJpeg,
         imageRef,
-        fromTrash,
         containerSize,
     } = props;
 
@@ -24,18 +23,13 @@ export default function Broswer(props) {
         }
 
         if (!toJpeg) {
-            if (!fromTrash) {
-                return `${prefix}/files/${file.path}`
-            }
-            return `${prefix}/trash/${file.path}`
+            return `${prefix}/files/${file.path}`
         }
 
         // path need to be url escaped
         const escapedPath = encodeURIComponent(file.path)
-        if (!fromTrash) {
-            return `${prefix}/api/encoded?path=${escapedPath}&width=${containerSize.width}&height=${containerSize.height}`
-        }
-        return `${prefix}/api/encoded?path=${escapedPath}&trash=1&&width=${containerSize.width}&height=${containerSize.height}`
+        // return `${prefix}/api/encoded?path=${escapedPath}&width=${containerSize.width}&height=${containerSize.height}`
+        return `${prefix}/api/encoded?path=${escapedPath}`
     }
 
     useEffect(() => {
@@ -49,9 +43,9 @@ export default function Broswer(props) {
             <div className="mx-3">
                 {imgSrc && <ImageView imageSrc={imgSrc} imageRef={imageRef} />}
             </div>
-            <div className="mx-3 max-w-sm overflow-x-hidden overflow-y-auto" >
-                <Details file={files ? files[curIdx] : null} fromTrash={fromTrash} containerSize={containerSize} />
-            </div>
+            {/* <div className="mx-3 max-w-sm overflow-x-hidden overflow-y-auto" >
+                <Details file={files ? files[curIdx] : null} containerSize={containerSize} />
+            </div> */}
         </div>
     )
 }

@@ -12,31 +12,21 @@ import (
 
 type Broswer struct {
 	// root is the root directory of the Broswer
-	root string
+	norminateRoot string
+	root          string
 	// skipLength is the length of the root path
 	rootSkipLength int
 
 	// extsFilter is the extensions of the files
 	extsFilter map[string]struct{}
 
-	// trash is the trash directory
-	trash           string
-	trashSkipLength int
-
 	// jpeg quality
 	quality int
 }
 
-func NewBroswer(root, trash string, exts []string, quality int) *Broswer {
+func NewBroswer(root string, exts []string, quality int) *Broswer {
 	root = filepath.Clean(root)
 	logrus.Infof("root path: %q", root)
-
-	// ensure trash directory exists
-	trash = filepath.Clean(trash)
-	if err := os.MkdirAll(trash, 0755); err != nil {
-		logrus.Errorf("create trash directory %s error: %v", trash, err)
-	}
-	logrus.Infof("trash path: %q", trash)
 
 	// create extensions filter
 	extsFilter := make(map[string]struct{})
@@ -45,13 +35,19 @@ func NewBroswer(root, trash string, exts []string, quality int) *Broswer {
 		extsFilter[ext] = struct{}{}
 	}
 
+	// eval the root if it is a link
+	realRoot, err := filepath.EvalSymlinks(root)
+	if err != nil {
+		logrus.Errorf("eval root path %s error: %v", root, err)
+		return nil
+	}
+
 	b := &Broswer{
-		root:            root,
-		rootSkipLength:  len(root),
-		extsFilter:      extsFilter,
-		trash:           trash,
-		trashSkipLength: len(trash),
-		quality:         quality,
+		norminateRoot:  root,
+		root:           realRoot,
+		rootSkipLength: len(realRoot),
+		extsFilter:     extsFilter,
+		quality:        quality,
 	}
 
 	return b
@@ -88,6 +84,11 @@ func (b *Broswer) files(root, folder string, skipLen int) ([]*File, error) {
 			// REVISIT: this is a bug, we should not have this,
 			// if the root is a link to a directory
 			if fpath == root {
+				return nil
+			}
+
+			// skip synology eaDir
+			if strings.Contains(fpath, "@eaDir") {
 				return nil
 			}
 
@@ -131,14 +132,21 @@ func (b *Broswer) folders(root string, skipLen int) ([]string, error) {
 			return err
 		}
 
-		if info.IsDir() {
-			// trim root prefix
-			if fpath == root {
-				return nil
-			}
-			fpath = fpath[skipLen+1:]
-			folders = append(folders, fpath)
+		if !info.IsDir() {
+			return nil
 		}
+		// trim root prefix
+		if fpath == root {
+			return nil
+		}
+
+		// skip synology eaDir
+		fpath = fpath[skipLen+1:]
+		if strings.Contains(fpath, "@eaDir") {
+			return nil
+		}
+
+		folders = append(folders, fpath)
 		return nil
 	})
 	if err != nil {
@@ -157,28 +165,9 @@ func (b *Broswer) Folders() ([]string, error) {
 	return b.folders(b.root, b.rootSkipLength)
 }
 
-func (b *Broswer) TrashFiles(d string) ([]*File, error) {
-	return b.files(b.trash, d, b.trashSkipLength)
-}
-
-func (b *Broswer) TrashFolders() ([]string, error) {
-	return b.folders(b.trash, b.trashSkipLength)
-}
-
 func (b *Broswer) Delete(p string) error {
-	// normalize the path relative to the root
+	// add .del suffix to the file
 	filepath := path.Join(b.root, p)
-	trashPath := path.Join(b.trash, p)
-	if err := os.MkdirAll(path.Dir(trashPath), 0755); err != nil {
-		logrus.Errorf("create trash directory %s error: %v", path.Dir(trashPath), err)
-		return err
-	}
-	return os.Rename(filepath, trashPath)
-}
-
-func (b *Broswer) Restore(p string) error {
-	// normalize the path relative to the root
-	filepath := path.Join(b.root, p)
-	trashPath := path.Join(b.trash, p)
-	return os.Rename(trashPath, filepath)
+	delPath := filepath + ".del"
+	return os.Rename(filepath, delPath)
 }

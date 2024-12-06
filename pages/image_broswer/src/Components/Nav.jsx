@@ -67,7 +67,6 @@ export default function Nav(props) {
 
     const CurrentDirectory = () => {
         const [folders, setFolders] = useState([]);
-        const [trashFolders, setTrashFolders] = useState([]);
 
         const fetchFolders = () => {
             axios.get('/api/folders')
@@ -79,27 +78,14 @@ export default function Nav(props) {
                 .catch(err => {
                     console.log(err);
                 });
-        }
-        const fetchTrashFolders = () => {
-            axios.get('/api/trash_folders')
-                .then(res => {
-                    const folders = res.data.folders;
-                    folders.unshift('/');
-                    setTrashFolders(folders);
-                })
-                .catch(err => {
-                    console.log(err);
-                });
         };
 
         useEffect(() => {
             fetchFolders();
-            fetchTrashFolders();
         }, []);
 
-        const handleFolderChange = (path, fromTrash) => {
+        const handleFolderChange = (path) => {
             currentDir.set(path);
-            currentDir.setFromTrash(fromTrash);
 
             const elem = document.activeElement;
             if (elem) {
@@ -112,25 +98,15 @@ export default function Nav(props) {
                 <div className="dropdown">
                     <label tabIndex={0} className="btn btn-ghost">
                         <div className='flex-1 overflow-clip'>
-                            {currentDir.cur} {currentDir.fromTrash && <span className='text-red-500'> (trash)</span>}
+                            {currentDir.cur}
                         </div>
                     </label>
                     <ul tabIndex={0} className="dropdown-content menu text-sm whitespace-nowrap p-2 bg-primary border-dashed w-auto">
                         {folders.map((folder) => {
                             return (
-                                <li key={folder} className='hover:bg-accent' onClick={() => handleFolderChange(folder, false)}>
+                                <li key={folder} className='hover:bg-accent' onClick={() => handleFolderChange(folder)}>
                                     <div className="flex flex-row py-0">
                                         <div className="flex-1 text-left">{folder}</div>
-                                    </div>
-                                </li>
-                            )
-                        })}
-                        {trashFolders.map((folder) => {
-                            return (
-                                <li key={folder} className='hover:bg-accent' onClick={() => handleFolderChange(folder, true)}>
-                                    <div className="flex flex-row py-0">
-                                        <div className="flex-1 text-left">{folder}</div>
-                                        <div className="flex-1 text-right text-red-500">trash</div>
                                     </div>
                                 </li>
                             )

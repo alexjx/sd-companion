@@ -4,17 +4,15 @@ import { useHotkeys } from 'react-hotkeys-hook'
 
 import Nav from './Components/Nav'
 import Broswer from './Components/Broswer'
-import PopupAlert from './Components/Alert'
 
 import './App.css'
 
 function App() {
     if (process.env.NODE_ENV === "development") {
-        axios.defaults.baseURL = "http://localhost:9080";
+        axios.defaults.baseURL = "http://localhost:19080";
     }
 
     const [currentDir, setCurrentDir] = useState("/")
-    const [fromTrash, setFromTrash] = useState(false)
     const [files, setFiles] = useState([]);
     const [curIdx, setCurIdx] = useState(0);
     const [toJpeg, setToJpeg] = useState(true);
@@ -50,46 +48,28 @@ function App() {
     const handleDelete = () => {
         if (curIdx < files.length) {
             const f = files[curIdx];
-            if (!fromTrash) {
-                axios.delete(`/api/file?path=${f.path}`)
-                    .then(res => {
-                        fetchFiles();
-                    })
-            } else {
-                axios.put(`/api/file?path=${f.path}`)
-                    .then(res => {
-                        fetchFiles();
-                    })
-            }
+            axios.delete(`/api/file?path=${f.path}`)
+                .then(res => {
+                    fetchFiles();
+                })
         }
     }
 
     function fetchFiles() {
-        if (fromTrash) {
-            axios.get(`/api/trash_files?dir=${currentDir}`)
-                .then(res => {
-                    setFiles(res.data.files);
-                })
-                .catch(err => {
-                    // FIXME: alert user
-                    console.log(err);
-                });
-        } else {
-            axios.get(`/api/files?dir=${currentDir}`)
-                .then(res => {
-                    setFiles(res.data.files);
-                })
-                .catch(err => {
-                    // FIXME: alert user
-                    console.log(err);
-                });
-        }
+        axios.get(`/api/files?dir=${currentDir}`)
+            .then(res => {
+                setFiles(res.data.files);
+            })
+            .catch(err => {
+                // FIXME: alert user
+                console.log(err);
+            });
     }
 
     // use effect to fetch issues
     useEffect(() => {
         fetchFiles();
-    }, [currentDir, fromTrash]);
+    }, [currentDir]);
     useEffect(() => {
         if (containerRef.current === null) {
             return;
@@ -145,11 +125,6 @@ function App() {
                             setCurrentDir(dir);
                             setCurIdx(0);
                         },
-                        fromTrash: fromTrash,
-                        setFromTrash: (trash) => {
-                            setFromTrash(trash);
-                            setCurIdx(0);
-                        },
                     }
                 }
                 containerSize={containerSize}
@@ -168,7 +143,6 @@ function App() {
                 innerRef={containerRef}
                 toJpeg={toJpeg}
                 imageRef={imageRef}
-                fromTrash={fromTrash}
                 containerSize={containerSize}
             />
         </div>

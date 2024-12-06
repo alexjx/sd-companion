@@ -4,7 +4,6 @@ import axios from "axios";
 export default function Details(props) {
     const {
         file,
-        fromTrash,
     } = props;
 
     const [metadata, setMetadata] = useState([]);
@@ -23,10 +22,6 @@ export default function Details(props) {
 
     const fetchMetadata = (path) => {
         let url = `/api/metadata?path=${path}`;
-        if (fromTrash) {
-            url = `/api/metadata?path=${path}&trash=1`;
-        }
-
         axios.get(url)
             .then(res => {
                 setMetadata(res.data.metadata);
@@ -39,9 +34,6 @@ export default function Details(props) {
     const fileUrl = (f) => {
         if (!f) {
             return "";
-        }
-        if (fromTrash) {
-            return `/trash/${f.path}`;
         }
         return `/files/${f.path}`;
     }

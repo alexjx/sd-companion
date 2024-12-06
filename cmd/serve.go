@@ -44,12 +44,6 @@ var ServeCmd = &cli.Command{
 			Usage:   "the quality of the jpeg image",
 			Value:   80,
 		},
-		&cli.StringFlag{
-			Name:     "trash",
-			Aliases:  []string{"t"},
-			Usage:    "the trash directory",
-			Required: true,
-		},
 	},
 	Action: serveAction,
 }
@@ -59,22 +53,28 @@ type ServeConfig struct {
 	Listen  string
 	Ext     []string
 	Quality int
-	Trash   string
 }
 
 // NewEngine create a gin engine
 func NewEngine(cfg *ServeConfig, b *broswer.Broswer) *gin.Engine {
 	r := gin.New()
 
+	////////////////////////////////////////////
 	// setup logger
 	logger := logrus.WithFields(logrus.Fields{
 		"component": "gin",
 	})
 	r.Use(gin.LoggerWithWriter(logger.WriterLevel(logrus.InfoLevel)))
-
 	// recovery
 	r.Use(gin.Recovery())
+	// cors
+	corsCfg := cors.DefaultConfig()
+	corsCfg.AllowAllOrigins = true
+	corsCfg.AllowHeaders = []string{"*"}
+	corsCfg.AllowMethods = []string{"*"}
+	r.Use(cors.New(corsCfg))
 
+	////////////////////////////////////////////
 	// static
 	staticFs := pages.EmbedFolder(pages.StaticFS, "image_broswer/dist", true)
 	r.Use(static.Serve("/", staticFs))
@@ -82,11 +82,8 @@ func NewEngine(cfg *ServeConfig, b *broswer.Broswer) *gin.Engine {
 		c.FileFromFS("index.html", staticFs)
 	})
 
-	// cors
-	corsCfg := cors.DefaultConfig()
-	corsCfg.AllowAllOrigins = true
-	r.Use(cors.New(corsCfg))
-
+	////////////////////////////////////////////
+	// apis
 	api := r.Group("/api")
 	{
 		// return the root path
@@ -126,36 +123,6 @@ func NewEngine(cfg *ServeConfig, b *broswer.Broswer) *gin.Engine {
 			})
 		})
 
-		// query trash files
-		api.GET("/trash_files", func(c *gin.Context) {
-			dir := c.Query("dir")
-			files, err := b.TrashFiles(dir)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{
-					"error": err.Error(),
-				})
-				return
-			}
-
-			c.JSON(http.StatusOK, gin.H{
-				"files": files,
-			})
-		})
-
-		api.GET("/trash_folders", func(c *gin.Context) {
-			folders, err := b.TrashFolders()
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{
-					"error": err.Error(),
-				})
-				return
-			}
-
-			c.JSON(http.StatusOK, gin.H{
-				"folders": folders,
-			})
-		})
-
 		// delete
 		api.DELETE("/file", func(c *gin.Context) {
 			path := c.Query("path")
@@ -176,52 +143,6 @@ func NewEngine(cfg *ServeConfig, b *broswer.Broswer) *gin.Engine {
 
 			c.JSON(http.StatusOK, gin.H{
 				"message": "file deleted",
-			})
-		})
-
-		// restore
-		api.PUT("/file", func(c *gin.Context) {
-			path := c.Query("path")
-			if path == "" {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"error": "path is required",
-				})
-				return
-			}
-
-			err := b.Restore(path)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{
-					"error": err.Error(),
-				})
-				return
-			}
-		})
-
-		api.GET("/metadata", func(c *gin.Context) {
-			path := c.Query("path")
-			if path == "" {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"error": "path is required",
-				})
-				return
-			}
-
-			inTrash := false
-			if c.Query("trash") != "" {
-				inTrash = true
-			}
-
-			metadata, err := b.Metadata(path, inTrash)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{
-					"error": err.Error(),
-				})
-				return
-			}
-
-			c.JSON(http.StatusOK, gin.H{
-				"metadata": metadata,
 			})
 		})
 
@@ -258,12 +179,7 @@ func NewEngine(cfg *ServeConfig, b *broswer.Broswer) *gin.Engine {
 				width = int(ww)
 			}
 
-			inTrash := false
-			if c.Query("trash") != "" {
-				inTrash = true
-			}
-
-			encoded, err := b.Encoded(path, width, height, inTrash)
+			encoded, err := b.Encoded(path, width, height)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error": err.Error(),
@@ -280,17 +196,12 @@ func NewEngine(cfg *ServeConfig, b *broswer.Broswer) *gin.Engine {
 		files.StaticFS("/", http.Dir(cfg.Root))
 	}
 
-	trash := r.Group("/trash")
-	{
-		trash.StaticFS("/", http.Dir(cfg.Trash))
-	}
-
 	return r
 }
 
 // NewBroswer create a broswer
 func NewBroswer(cfg *ServeConfig) *broswer.Broswer {
-	return broswer.NewBroswer(cfg.Root, cfg.Trash, cfg.Ext, cfg.Quality)
+	return broswer.NewBroswer(cfg.Root, cfg.Ext, cfg.Quality)
 }
 
 func serve(cfg *ServeConfig, engine *gin.Engine) {
@@ -305,7 +216,6 @@ func serveAction(cctx *cli.Context) error {
 		Listen:  cctx.String("listen"),
 		Ext:     cctx.StringSlice("extensions"),
 		Quality: cctx.Int("quality"),
-		Trash:   cctx.String("trash"),
 	}
 
 	fxApp := fx.New(

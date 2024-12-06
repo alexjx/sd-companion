@@ -9,7 +9,6 @@ import (
 func TestNewBroswer(t *testing.T) {
 	b := broswer.NewBroswer(
 		"/workspaces/sd-companion/tmp",
-		"/workspaces/sd-companion/tmp_trash",
 		[]string{".jpg", ".png"},
 		80,
 	)
@@ -27,5 +26,4 @@ func TestNewBroswer(t *testing.T) {
 		t.Errorf("folders count is not correct")
 	}
 
-    
 }
